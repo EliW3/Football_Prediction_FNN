@@ -1,8 +1,27 @@
-from get_data_and_preprocess.py import get_data_and_preprocess
-from fnn_network.py import FootballPredictor
+from get_data_and_preprocess import get_data_and_preprocess
+from fnn_network import FootballPredictor
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
+import pandas as pd
+
+train_df, _ = get_data_and_preprocess()
+
+train_teams = pd.concat([train_df["home_team"], train_df["away_team"]]).unique()
+train_tournaments = train_df["tournament"].unique()
+
+team_id = {team: i for i, team in enumerate(train_teams)}
+tournament_id = {tournament: i for i, tournament in enumerate(train_tournaments)}
+
+num_teams = len(team_id)
+num_tournaments = len(tournament_id)
+model = FootballPredictor(num_teams=num_teams, num_tournaments=num_tournaments)
+
+try:
+    model.load_state_dict(torch.load("fnn_model.pth"))
+    print("Successfully loaded trained parameters!")
+except FileNotFoundError:
+    print("Weights file not found. Running with baseline model.")
 
 def get_latest_team_state(team, df):
     home_matches = df[df["home_team"] == team]
@@ -73,8 +92,8 @@ def predict_matches(matches):
             if competition not in tournament_id:
                 raise ValueError(f"Unknown competition: {competition}")
 
-            h = get_latest_team_state(home_team)
-            a = get_latest_team_state(away_team)
+            h = get_latest_team_state(home_team, train_df)
+            a = get_latest_team_state(away_team, train_df)
 
             elo = torch.tensor([[
                 h["ELO_goal"],
@@ -112,10 +131,10 @@ def predict_matches(matches):
                 a["Clean_sheets"]
             ]], dtype=torch.float32)
 
-            home = torch.tensor([team_id[home_team]])
-            away = torch.tensor([team_id[away_team]])
-            tournament = torch.tensor([tournament_id[competition]])
-
+            home = torch.tensor([team_id[home_team]], dtype=torch.long)
+            away = torch.tensor([team_id[away_team]], dtype=torch.long)
+            tournament = torch.tensor([tournament_id[competition]], dtype=torch.long)
+            
             probs = torch.softmax(
                 model(home, away, tournament, elo, running),
                 dim=1
@@ -129,6 +148,14 @@ def predict_matches(matches):
                 "draw_probability": probs[1].item(),
                 "away_win_probability": probs[2].item(),
                 "prediction": ["Home", "Draw", "Away"][probs.argmax().item()]
+
             })
 
     return pd.DataFrame(predictions)
+if __name__ == "__main__":
+    upcoming_fixtures = [
+        ("Argentina", "Brazil", "Official-Match"),
+        ("France", "England", "Official-Match")
+    ]
+    res = predict_matches(upcoming_fixtures)
+    print(res)
