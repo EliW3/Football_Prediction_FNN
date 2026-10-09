@@ -108,3 +108,11 @@ def train(TRAIN_START ,TEST_START, TEST_END):
           f"Epoch {epoch + 1:02d} "
           f"Loss: {total_loss / len(loader):.4f}"
       )
+ weights_filename = "fnn_model.pth"
+
+    torch.save(model.state_dict(), weights_filename)
+    
+    print(f"\nSaved optimized neural network parameters successfully to: {weights_filename}")
+    
+    # Return statement (if needed)
+    return model, test_df
