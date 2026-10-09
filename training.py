@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 def train(TRAIN_START ,TEST_START, TEST_END):
-  training_df, test_df = get_data_and_preprocess(TRAIN_START, TEST_START, TEST_END)
+  train_df, test_df = get_data_and_preprocess(TRAIN_START, TEST_START, TEST_END)
   elo_columns = [
       "ELO_goal_home",
       "ELO_goal_away",
@@ -74,8 +74,12 @@ def train(TRAIN_START ,TEST_START, TEST_END):
       batch_size=256,
       shuffle=True
   )
-  
-  model = FootballPredictor()
+  num_teams = int(
+      max(train_df["home_id"].max(), train_df["away_id"].max()) + 1
+  )
+  num_tournaments = int(train_df["tournament_id"].max() + 1)
+
+  model = FootballPredictor(num_teams=num_teams, num_tournaments=num_tournaments)
   optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
   loss_func = nn.CrossEntropyLoss()
   
