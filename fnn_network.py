@@ -2,14 +2,14 @@ import torch
 import torch.nn as nn
 
 class FootballPredictor(nn.Module):
-    def __init__(self):
+    def __init__(self, num_teams, num_tournaments):
         super().__init__()
         self.temperature = nn.Parameter(torch.ones(1) * 1.85)
 
-        self.team_embedding = nn.Embedding(len(train_teams), 8)
-        self.team_home_specific_embedding = nn.Embedding(len(train_teams), 8)
-        self.team_away_specific_embedding = nn.Embedding(len(train_teams), 8)
-        self.competition_embedding = nn.Embedding(len(train_tournaments), 4)
+        self.team_embedding = nn.Embedding(num_teams, 8)
+        self.team_home_specific_embedding = nn.Embedding(num_teams, 8)
+        self.team_away_specific_embedding = nn.Embedding(num_teams, 8)
+        self.competition_embedding = nn.Embedding(num_tournaments, 4)
 
         self.fc = nn.Sequential(
             nn.Linear(60, 128),
