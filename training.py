@@ -1,8 +1,12 @@
-from get_data_and_preprocess.py import get_data_and_preprocess
+from get_data_and_preprocess import get_data_and_preprocess
 import pandas as pd
-from fnn_network.py import FootballPredictor
+from fnn_network import FootballPredictor
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
 
-def train(TEST_START, TEST_END)
+def train(TRAIN_START ,TEST_START, TEST_END):
+  training_df, test_df = get_data_and_preprocess(TRAIN_START, TEST_START, TEST_END)
   elo_columns = [
       "ELO_goal_home",
       "ELO_goal_away",
