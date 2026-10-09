@@ -2,12 +2,8 @@ import pandas as pd
 from collections import defaultdict
 import numpy as np
 
-def get_data_and_preprocess(TRAIN_START=2015, TEST_START=2023, TEST_END=2026, URL="https://raw.githubusercontent.com/martj42/international_results/master/results.csv")
+def get_data_and_preprocess(TRAIN_START=2015, TEST_START=2023, TEST_END=2026, URL="https://raw.githubusercontent.com/martj42/international_results/master/results.csv"):
     URL = URL
-    
-    TRAIN_START = TRAIN_START
-    TEST_START = TEST_START
-    TEST_END = TEST_END
     
     K = 24
     K_GOALS = 10
@@ -205,4 +201,4 @@ def get_data_and_preprocess(TRAIN_START=2015, TEST_START=2023, TEST_END=2026, UR
     df["tournament_id"] = df["tournament"].map(tournament_id)
     df = df.dropna().reset_index(drop=True)
     
-    return df
+    return train_df, test_df
