@@ -149,13 +149,18 @@ def evaluate_predictions(predictions, actual):
         "calibration": calibration
     }
 
-# FIX START: Reconstruct sizes and load data/weights locally since training() returns nothing
 train_df, test_df = get_data_and_preprocess()
+
+train_teams = pd.concat([train_df["home_team"], train_df["away_team"]]).unique()
+train_tournaments = train_df["tournament"].unique()
+
+team_id = {team: i for i, team in enumerate(train_teams)}
+tournament_id = {tournament: i for i, tournament in enumerate(train_tournaments)}
+
 num_teams = int(max(train_df["home_id"].max(), train_df["away_id"].max()) + 1)
 num_tournaments = int(train_df["tournament_id"].max() + 1)
 model = FootballPredictor(num_teams=num_teams, num_tournaments=num_tournaments)
 model.load_state_dict(torch.load("fnn_model.pth"))
-# FIX END
 
 predictions, actual = backtest(model, test_df)
 
@@ -191,5 +196,7 @@ matches = [
 
 future_predictions = predict_matches(matches)
 
+print("\nPredictions:")
+print(future_predictions.to_string(index=False))
 print("\nPredictions:")
 print(future_predictions.to_string(index=False))
