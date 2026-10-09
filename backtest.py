@@ -3,9 +3,9 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import pandas as pd
 import numpy as np
-from fnn_network.py import FootballPredictor
-from get_data_and_preprocess.py import get_data_and_preprocess
-from training import training
+from fnn_network import FootballPredictor
+from get_data_and_preprocess import get_data_and_preprocess
+from predict import predict_matches
  
 
 def backtest(model, test_df):
@@ -148,6 +148,14 @@ def evaluate_predictions(predictions, actual):
         "brier": brier,
         "calibration": calibration
     }
+
+# FIX START: Reconstruct sizes and load data/weights locally since training() returns nothing
+train_df, test_df = get_data_and_preprocess()
+num_teams = int(max(train_df["home_id"].max(), train_df["away_id"].max()) + 1)
+num_tournaments = int(train_df["tournament_id"].max() + 1)
+model = FootballPredictor(num_teams=num_teams, num_tournaments=num_tournaments)
+model.load_state_dict(torch.load("fnn_model.pth"))
+# FIX END
 
 predictions, actual = backtest(model, test_df)
 
