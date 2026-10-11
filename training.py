@@ -113,6 +113,4 @@ def train(TRAIN_START ,TEST_START, TEST_END):
     torch.save(model.state_dict(), weights_filename)
     
     print(f"\nSaved optimized neural network parameters successfully to: {weights_filename}")
-    
-    # Return statement (if needed)
     return model, test_df
